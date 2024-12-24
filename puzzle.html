@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jump-and-Run Spiel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87ceeb;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #87ceeb;
+        }
+
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            color: white;
+        }
+
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #jumpButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #voucherPage {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #voucherPage button {
+            padding: 10px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+<div id="score">Punkte: 0</div>
+
+<!-- Button zum Starten des Spiels -->
+<button id="startButton">Spiel starten</button>
+
+<!-- Jump Button -->
+<button id="jumpButton">Springen</button>
+
+<!-- Gutscheine-Seite -->
+<div id="voucherPage">
+    <h2>Herzlichen Glückwunsch! Du hast das Ziel erreicht!</h2>
+    <p>Hier sind deine Gutscheine:</p>
+    <button onclick="window.location.href='voucher.html'">Zum Gutschein</button>
+</div>
+
+<!-- Game Over Meldung -->
+<div id="gameOver">
+    <p>Game Over! Deine Punktzahl: <span id="finalScore"></span></p>
+    <p>Das Spiel wird jetzt neu gestartet...</p>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startButton = document.getElementById('startButton');
+    const jumpButton = document.getElementById('jumpButton');
+    const voucherPage = document.getElementById('voucherPage');
+    const gameOverDiv = document.getElementById('gameOver');
+    const finalScore = document.getElementById('finalScore');
+    let character = {
+        x: 100,
+        y: 320,
+        width: 50,
+        height: 50,
+        speed: 5,
+        jumping: false,
+        ducking: false,
+        jumpHeight: 0,
+        image: new Image(),
+    };
+
+    character.image.src = 'boss.jpg'; // Bild des Charakters (boss.jpg)
+
+    const obstacleImage = new Image();
+    obstacleImage.src = 'sauger.jpg'; // Bild für Hindernis (sauger.jpg)
+
+    let obstacles = [];
+    let score = 0;
+    let gravity = 2; // Schwerkraft
+    let jumpStrength = 15;
+    let maxJumpHeight = 100; // Maximale Sprunghöhe
+    let gameStarted = false;
+    let distanceToGoal = 1000; // Gesamtstrecke zum Ziel (z.B. 1000px)
+    let goalReached = false;
+
+    // Feste Höhen für die Hindernisse (3 Bahnen)
+    const obstacleHeights = [200, 250, 300]; // Feste Y-Werte für die Hindernisse
+
+    // Event Listener für Jump-Button
+    jumpButton.addEventListener('click', () => {
+        if (!character.jumping) {
+            character.jumping = true;
+        }
+    });
+
+    // Event Listener für Start-Button
+    startButton.addEventListener('click', startGame);
+
+    function startGame() {
+        gameStarted = true;
+        startButton.style.display = 'none'; // Verstecke den Start-Button
+        jumpButton.style.display = 'block'; // Zeige den Jump-Button
+        score = 0;
+        obstacles = [];
+        character.y = 320;
+        distanceToGoal = 1000;
+        goalReached = false;
+        gameLoop();
+    }
+
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        handleCharacter();
+        handleObstacles();
+        handleCollisions();
+        handleScore();
+    }
+
+    // Funktion, um den Charakter zu steuern
+    function handleCharacter() {
+        if (character.jumping) {
+            character.y -= jumpStrength;
+            character.jumpHeight += jumpStrength;
+            
+            // Verhindern, dass der Charakter über die maximale Sprunghöhe hinaus springt
+            if (character.jumpHeight >= maxJumpHeight) {
+                character.jumping = false;
+            }
+        }
+
+        if (!character.jumping && character.y < 320) {
+            character.y += gravity;
+            character.jumpHeight = 0;
+        }
+
+        // Zeichne den Charakter
+        ctx.drawImage(character.image, character.x, character.y, character.width, character.height);
+    }
+
+    // Hindernisse erzeugen - nun auf festen Bahnen
+    function handleObstacles() {
+        if (Math.random() < 0.02) {
+            // Zufällige Auswahl einer der festen Höhen für das Hindernis
+            const randomHeight = obstacleHeights[Math.floor(Math.random() * obstacleHeights.length)];
+
+            obstacles.push({
+                x: canvas.width,
+                y: randomHeight,
+                width: 50,
+                height: 50,
+            });
+        }
+
+        obstacles.forEach((obstacle, index) => {
+            obstacle.x -= 5; // Bewege Hindernisse nach links
+
+            // Hindernis mit Bild zeichnen
+            ctx.drawImage(obstacleImage, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+            if (obstacle.x < 0) {
+                obstacles.splice(index, 1); // Entferne Hindernisse, wenn sie den Bildschirm verlassen
+                score++;
+                distanceToGoal -= 50;
+            }
+        });
+    }
+
+    // Kollisionserkennung
+    function handleCollisions() {
+        obstacles.forEach((obstacle) => {
+            if (
+                character.x < obstacle.x + obstacle.width &&
+                character.x + character.width > obstacle.x &&
+                character.y < obstacle.y + obstacle.height &&
+                character.y + character.height > obstacle.y
+            ) {
+                gameOver();
+            }
+        });
+    }
+
+    // Punktestand und Fortschritt anzeigen
+    function handleScore() {
+        document.getElementById('score').textContent = 'Punkte: ' + score;
+
+        // Ziel erreichen, wenn eine bestimmte Distanz zurückgelegt wird
+        if (distanceToGoal <= 0) {
+            goalReached = true;
+            voucherPage.style.display = 'block';
+            // Automatische Weiterleitung nach 3 Sekunden
+            setTimeout(() => {
+                window.location.href = 'voucher.html'; // Weiterleitung zur voucher.html-Seite
+            }, 3000); // 3 Sekunden nach dem Ziel
+        }
+    }
+
+    // Game Over Funktion
+    function gameOver() {
+        gameStarted = false;
+        finalScore.textContent = score;
+        gameOverDiv.style.display = 'block';
+        setTimeout(() => {
+            // Spiel zurücksetzen nach kurzer Zeit
+            gameOverDiv.style.display = 'none';
+            score = 0;
+            obstacles = [];
+            character.y = 320;
+            distanceToGoal = 1000;
+            startButton.style.display = 'block'; // Button anzeigen, um das Spiel erneut zu starten
+            jumpButton.style.display = 'none'; // Verstecke den Jump-Button
+        }, 3000); // 3 Sekunden warten, dann neu starten
+    }
+
+    // Das Spiel starten und aktualisieren
+    function gameLoop() {
+        if (gameStarted) {
+            update();
+            requestAnimationFrame(gameLoop); // Endloser Loop
+        }
+    }
+</script>
+
+</body>
+</html>

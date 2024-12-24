@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deine Gutscheine</title>
+    <style>
+        body {
+            background-color: #f9f0e7;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6347;
+            margin-top: 50px;
+            animation: title-animation 1.5s ease-in-out infinite alternate;
+        }
+
+        .cat-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .cat {
+            width: 100px;
+            height: 100px;
+            background-color: #f8d7a6;
+            border-radius: 50%;
+            position: relative;
+            animation: cat-wiggle 1s infinite;
+        }
+
+        .cat:before {
+            content: "🐱";
+            font-size: 50px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .cat:after {
+            content: "🐾";
+            font-size: 40px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .voucher {
+            background-color: #fff8e1;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .voucher img {
+            width: 150px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .voucher h2 {
+            color: #4caf50;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .voucher p {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Animationen */
+        @keyframes title-animation {
+            0% {
+                transform: rotate(0deg);
+                color: #ff6347;
+            }
+            50% {
+                transform: rotate(10deg);
+                color: #f76c6c;
+            }
+            100% {
+                transform: rotate(-10deg);
+                color: #ff6347;
+            }
+        }
+
+        @keyframes cat-wiggle {
+            0% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(5deg);
+            }
+            100% {
+                transform: rotate(-5deg);
+            }
+        }
+
+        /* Gutschein Animation */
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .voucher {
+            animation: bounce 1s ease infinite;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>🎉 Herzlichen Glückwunsch! 🎉</h1>
+
+    <!-- Animierte Katzen -->
+    <div class="cat-container">
+        <div class="cat"></div>
+        <div class="cat"></div>
+        <div class="cat"></div>
+    </div>
+
+    <!-- Erster Gutschein: Kuscheltierkatze -->
+    <div class="voucher">
+        <img src="kuschel.jpg" alt="Kuscheltierkatze">
+        <h2>Du hast ein tolles Kuscheltierkatze gewonnen!</h2>
+        <p>Herzlichen Glückwunsch, du hast dir diese flauschige Katze verdient! Kuschel sie fest und genieße die Freude! 🐾</p>
+    </div>
+
+    <!-- Zweiter Gutschein: Wertgutschein -->
+    <div class="voucher">
+        <h2>Wertgutschein über 20€</h2>
+        <p>Du hast einen Gutschein im Wert von 20€ erhalten, den du in einem Laden deiner Wahl einlösen kannst. Viel Spaß beim Shoppen! 💸</p>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Hier könnte man zusätzliche Animationen hinzufügen, wenn die Seite geladen wird.
+            // Zum Beispiel könnte man den Gutschein mit einer Verzögerung einblenden oder einen Effekt auslösen.
+        };
+    </script>
+</body>
+</html>

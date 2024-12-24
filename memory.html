@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aber erst musst du sie dir verdienen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #fef4f8;
+            padding: 20px;
+        }
+        h1 {
+            color: #e63946;
+        }
+        #memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            background-color: #e63946;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Macht das Bild vollständig sichtbar */
+            display: none; /* Anfangs versteckt */
+        }
+        .card.flipped img {
+            display: block; /* Zeigt das Bild, wenn die Karte "umgedreht" ist */
+        }
+    </style>
+</head>
+<body>
+    <h1>Aber erst musst du sie dir verdienen</h1>
+    <p>Finde alle Paare, um deine Geschenke freizuschalten!</p>
+    <div id="memory-game"></div>
+
+    <script>
+        // Bilder für das Memory
+        const images = [
+            "boss.jpg",
+            "boss2.jpg",
+            "boss3.jpg",
+            "boss4.jpg"
+        ];
+
+        // Verdoppeln der Bilder, mischen
+        let cards = [...images, ...images].sort(() => Math.random() - 0.5);
+        const gameContainer = document.getElementById("memory-game");
+        let firstCard = null;
+        let secondCard = null;
+        let matchedPairs = 0;
+
+        // Karten erstellen
+        cards.forEach(image => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            const img = document.createElement("img");
+            img.src = image; // Bildquelle setzen
+            card.appendChild(img);
+            card.addEventListener("click", flipCard);
+            gameContainer.appendChild(card);
+        });
+
+        function flipCard() {
+            // Wenn die Karte bereits umgedreht ist oder wir schon zwei Karten haben, nichts tun
+            if (this.classList.contains("flipped") || secondCard) return;
+
+            this.classList.add("flipped");
+
+            if (!firstCard) {
+                firstCard = this;
+            } else {
+                secondCard = this;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const firstImage = firstCard.querySelector("img").src;
+            const secondImage = secondCard.querySelector("img").src;
+
+            // Wenn die Karten übereinstimmen
+            if (firstImage === secondImage) {
+                matchedPairs++;
+                firstCard = null;
+                secondCard = null;
+
+                if (matchedPairs === images.length) {
+                    setTimeout(() => {
+                        alert("Glückwunsch! Du hast das Spiel geschafft!");
+                        window.location.href = "puzzle.html"; // Weiterleitung zur Geschenkseite
+                    }, 500);
+                }
+            } else {
+                // Wenn die Karten nicht übereinstimmen, drehe sie nach einer kurzen Verzögerung um
+                setTimeout(() => {
+                    firstCard.classList.remove("flipped");
+                    secondCard.classList.remove("flipped");
+                    firstCard = null;
+                    secondCard = null;
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
